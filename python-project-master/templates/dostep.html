@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert alert-info" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <div class="col w-50 p-3 position-absolute top-10 start-0">
+        <div class="bg-dark p-1">
+            <div class="container mt-1">
+                <form class="d-flex" id="searchForm" method="POST" action="/search_dostep">
+                    <input class="form-control d-inline m-2" type="search" name="search_name" placeholder="Magazyn" aria-label="Magazyn">
+                    <input class="form-control d-inline m-2" type="search" name="search_towar" placeholder="Towar" aria-label="Towar">
+                    <button class="btn btn-outline-light m-2" type="submit">Szukaj</button>
+                </form>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addDostepModal">Dodaj nowy dostep</button>
+        </div>
+        <div class="modal fade" id="addDostepModal" tabindex="-1" aria-labelledby="addDostepModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addDostepModalLabel">Dodaj nowy dostep</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/add_dostep">
+                            <div class="mb-3">
+                            <label for="newDostepMagazyn" class="form-label">Magazyn</label>
+                            <select class="form-select mb-3" id ="newDostepMagazyn" name="newDostepMagazyn">
+                                {% for magazyn in magazyny %}
+                                    <option value= "{{magazyn.id_magazynu}}" SELECTED>{{magazyn.nazwa}}</option>"
+                                {% endfor %}
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label for="newDostepTowar" class="form-label">Towar</label>
+                            <select class="form-select mb-3" id ="newDostepTowar" name="newDostepTowar">
+                                {% for towar in towary %}
+                                    <option value= "{{towar.id_towaru}}" SELECTED>{{towar.nazwa}}</option>"
+                                {% endfor %}
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label for="newDostepAmount" class="form-label">Ilość</label>
+                            <input type="text" class="form-control" id="newDostepAmount" name="newDostepAmount">
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Dodaj</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+            <thead>
+                <tr>
+                    <th scope="col">Magazyn</th>
+                    <th scope="col">Towar</th>
+                    <th scope="col">Ilość</th>
+                    <th scope="col">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dostep in dostepy %}
+                <tr>
+                    <td>{{ dostep.nazwa_magazynu }}</td>
+                    <td>{{ dostep.nazwa_towaru }}</td>
+                    <td>{{ dostep.Dostep.ilosc }}</td>
+                    <td>
+                        <div class="d-flex">
+                            <form method="POST" action="/delete_dostep/{{ dostep.Dostep.id_dostepu }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal{{ dostep.Dostep.id_dostepu}}">Edytuj</button>
+                            </form>
+                        </div>
+                        <div class="modal fade" id="exampleModal{{ dostep.Dostep.id_dostepu }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ dostep.Dostep.id_dostepu}}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel{{ dostep.Dostep.id_dostepu }}">Edytuj dostęp</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="/edit_dostep/{{ dostep.Dostep.id_dostepu }}">
+                                            <div class="mb-3">
+                                                <label for="new_quantity{{ dostep.Dostep.id_dostepu }}" class="col-form-label">Ilość:</label>
+                                                <input type="text" class="form-control" id="new_quantity{{ dostep.Dostep.id_dostepu }}" name="new_quantity" value="{{ dostep.Dostep.ilosc }}">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col w-50 p-3 position-absolute top-10 start-50 ">
+        <div class="custom-table-responsive">
+                <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+                    <thead>
+                        <tr>
+                            <th scope="col">Magazyn</th>
+                            <th scope="col">Liczba typów towaru</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in dostep_stat %}
+                        <tr>
+                            <th scope="row">{{ stat.nazwa_magazynu }}</th>
+                            <td>{{ stat.liczba_rekordow }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+</div>
+{% endblock %}

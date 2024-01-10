@@ -1,0 +1,17 @@
+/* Zmiana koloru tekstu dla wszystkich elementów w modalu */
+.modal-content {
+    color: black; /* Tutaj możesz zmienić na wybrany kolor */
+}
+
+.custom-table-responsive {
+        width: 400px;
+        position: fixed;
+ /* dodaj niestandardowy odstęp od góry */
+    }
+
+.custom-table-responsivee {
+        left: 75%;
+        width: 400px;
+        position: fixed;
+ /* dodaj niestandardowy odstęp od góry */
+    }

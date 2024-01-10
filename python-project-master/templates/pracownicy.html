@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert alert-info" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="col w-75 p-3 position-absolute top-10 start-0">
+        <div class="bg-dark p-1">
+        <div class="container mt-1">
+            <form class="d-flex" id="searchForm" method="POST" action="/search_pracownik">
+                <input class="form-control d-inline m-2" type="search" name="search_name" placeholder="Imię" aria-label="Imię">
+                <input class="form-control d-inline m-2" type="search" name="search_lastname" placeholder="Nazwisko" aria-label="Nazwisko">
+                <input class="form-control d-inline m-2" type="search" name="search_magazyn" placeholder="Magazyn" aria-label="Magazyn">
+                <button class="btn btn-outline-light m-2" type="submit">Szukaj</button>
+            </form>
+        </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addPracownikModal">Dodaj pracownika</button>
+        </div>
+        <div class="modal fade" id="addPracownikModal" tabindex="-1" aria-labelledby="addPracownikModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPracownikModalLabel">Dodaj nowego pracownika</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/add_pracownik">
+                            <div class="mb-3">
+                                <label for="newPracownikName" class="form-label">Imię</label>
+                                <input type="text" class="form-control" id="newPracownikName" name="newPracownikName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPracownikSurname" class="form-label">Nazwisko</label>
+                                <input type="text" class="form-control" id="newPracownikSurname" name="newPracownikSurname">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPracownikMagazyn" class="form-label">Magazyn</label>
+                                <select class="form-select mb-3" id ="newPracownikMagazyn" name="newPracownikMagazyn">
+                                    {% for magazyn in magazyny %}
+                                        <option value= "{{magazyn.id_magazynu}}" SELECTED>{{magazyn.nazwa}}</option>"
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Dodaj</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+            <thead>
+                <tr>
+                    <th scope="col">Imię</th>
+                    <th scope="col">Nazwisko</th>
+                    <th scope="col">Magazyn</th>
+                    <th scope="col">Mail</th>
+                    <th scope="col">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pracownik in pracownicy %}
+                <tr>
+                    <th scope="row">{{ pracownik.Pracownicy.imie }}</th>
+                    <td>{{ pracownik.Pracownicy.nazwisko }}</td>
+                    <td>{{ pracownik.nazwa }}</td>
+                    <td>{{ pracownik.Pracownicy.mail }}</td>
+                    <td>
+                        <div class="d-flex">
+                            <form method="POST" action="/delete_pracownik/{{ pracownik.Pracownicy.id_pracownika }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPracownikModal{{ pracownik.Pracownicy.id_pracownika  }}">Edytuj</button>
+                            </form>
+                        </div>
+                        <div class="modal fade" id="editPracownikModal{{ pracownik.Pracownicy.id_pracownika }}" tabindex="-1" aria-labelledby="editPracownikModalLabel{{ pracownik.Pracownicy.id_pracownika }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="editPracownikModalLabel{{ pracownik.id_pracownika }}">Edytuj pracownika</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="POST" action="/edit_pracownik/{{ pracownik.Pracownicy.id_pracownika }}">
+                                                <div class="mb-3">
+                                                    <label for="new_name{{ pracownik.Pracownicy.id_pracownika }}" class="col-form-label">Imie:</label>
+                                                    <input type="text" class="form-control" id="new_name{{ pracownik.Pracownicy.id_pracownika }}" name="new_name" value="{{ pracownik.Pracownicy.imie }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="new_lastname{{ pracownik.Pracownicy.id_pracownika }}" class="col-form-label">Nazwisko:</label>
+                                                    <input type="text" class="form-control" id="new_lastname{{ pracownik.Pracownicy.id_pracownika }}" name="new_lastname" value="{{ pracownik.Pracownicy.nazwisko }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editPracownikMagazyn" class="form-label">Magazyn</label>
+                                                    <select class="form-select mb-3" id ="editPracownikMagazyn" name="new_magazyn">
+                                                        {% for magazyn in magazyny %}
+                                                        <option value= "{{magazyn.id_magazynu}}" SELECTED>{{magazyn.nazwa}}</option>"
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Zapisz</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col w-25 p-3 position-absolute top-10">
+        <div class="custom-table-responsivee">
+                <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+                    <thead>
+                        <tr>
+                            <th scope="col">Statystyki</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Liczba pracowników:</td>
+                            <td>{{ liczba_pracownikow }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

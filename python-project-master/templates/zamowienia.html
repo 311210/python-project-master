@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert alert-info" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <div class="col w-75 p-3 position-absolute top-10 start-0">
+        <div class="bg-dark p-1">
+    <div class="container mt-1">
+        <form class="d-flex" id="searchForm" method="POST" action="/search_zamowienia">
+            <div class="d-flex ">
+                <input class="form-control d-inline m-2" type="search" name="search_name_klient" placeholder="Imię Klienta" aria-label="Imię">
+                <input class="form-control d-inline m-2" type="search" name="search_lastname_klient" placeholder="Nazwisko Klienta" aria-label="Nazwisko">
+            </div>
+            <div class="d-flex ">
+                <input class="form-control d-inline m-2" type="search" name="search_towar" placeholder="Towar" aria-label="Towar">
+                <input class="form-control d-inline m-2" type="search" name="search_magazyn" placeholder="Magazyn" aria-label="Magazyn">
+            </div>
+            <button class="btn btn-outline-light m-2 align-self-start" type="submit">Szukaj</button>
+        </form>
+    </div>
+</div>
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addZamowienieModal">Dodaj zamowienie</button>
+        </div>
+        <div class="modal fade" id="addZamowienieModal" tabindex="-1" aria-labelledby="addZamowienieModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addZamowienieModalLabel">Dodaj nowe zamowienie</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/add_zamowienie">
+                            <div class="mb-3">
+                            <label for="addZamowieniaKlient" class="form-label">Klient</label>
+                            <select class="form-select mb-3" id ="addZamowieniaKlient" name="addZamowieniaKlient">
+                                {% for klient in klienci %}
+                                    <option value= "{{klient.id_klienta}}" SELECTED>{{klient.imie}} {{klient.nazwisko}}</option>"
+                                {% endfor %}
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label for="addZamowieniaTowar" class="form-label">Towar</label>
+                            <select class="form-select mb-3" id ="addZamowieniaTowar" name="addZamowieniaTowar">
+                                {% for towar in towary %}
+                                    <option value= "{{towar.id_towaru}}" SELECTED>{{towar.nazwa}}</option>"
+                                {% endfor %}
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label for="addZamowieniaMagazyn" class="form-label">Magazyn</label>
+                            <select class="form-select mb-3" id ="addZamowieniaMagazyn" name="addZamowieniaMagazyn">
+                                {% for magazyn in magazyny %}
+                                    <option value= "{{magazyn.id_magazynu}}" SELECTED>{{magazyn.nazwa}}</option>"
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                            <button type="submit" class="btn btn-primary">Dodaj</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+            <thead>
+                <tr>
+                    <th scope="col">ID zamówienia</th>
+                    <th scope="col">Imię klienta</th>
+                    <th scope="col">Nazwisko klienta</th>
+                    <th scope="col">Towar</th>
+                    <th scope="col">Magazyn</th>
+                    <th scope="col">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zam in zamowienia %}
+                <tr>
+                    <td>{{ zam.Zamowienia.id_zamowienia }}</td>
+                    <td>{{ zam.imie_klienta }}</td>
+                    <td>{{ zam.nazwisko_klienta }}</td>
+                    <td>{{ zam.nazwa_towaru }}</td>
+                    <td>{{ zam.nazwa_magazynu }}</td>
+
+                    <td>
+                        <div class="d-flex">
+                            <form method="POST" action="/delete_zamowienie/{{ zam.Zamowienia.id_zamowienia }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                            </form>
+                        </div>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col w-25 p-3 position-absolute top-10 start-50 ">
+        <div class="custom-table-responsivee">
+                <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+                    <thead>
+                        <tr>
+                            <th scope="col">Statystyki</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Liczba Zamówień:</td>
+                            <td>{{ liczba_zamowien }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

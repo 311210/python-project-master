@@ -1,0 +1,242 @@
+
+CREATE TABLE [Magazyny] (
+[id_magazynu] INTEGER PRIMARY KEY,
+[nazwa] NVARCHAR(50) NOT NULL UNIQUE,
+[adres] NVARCHAR(100) NOT NULL,
+CHECK (length(nazwa) > 0 AND length(adres) > 0)
+
+);
+
+CREATE TABLE [Pracownicy] (
+[id_pracownika] INTEGER PRIMARY KEY,
+[imie] VARCHAR(20) NOT NULL,
+[nazwisko] VARCHAR(30) NOT NULL,
+[id_magazynu] INTEGER,
+[mail] VARCHAR(30),
+CHECK (length(imie) > 0 AND length(nazwisko) > 0),
+FOREIGN KEY (id_magazynu) REFERENCES Magazyny (id_magazynu)
+);
+
+CREATE TABLE [Klienci] (
+[id_klienta] INTEGER PRIMARY KEY,
+[imie] VARCHAR(100) NOT NULL,
+[nazwisko] VARCHAR(100) NOT NULL,
+[saldo] INTEGER,
+CHECK (length(imie) > 0 AND length(nazwisko) > 0)
+
+);
+
+CREATE TABLE [Towar] (
+[id_towaru] INTEGER PRIMARY KEY,
+[nazwa] NVARCHAR(100) NOT NULL,
+[cena] INTEGER NOT NULL,
+CHECK (length(nazwa) > 0 AND length(cena) > 0)
+
+);
+
+CREATE TABLE [Dostep] (
+[id_dostepu] INTEGER PRIMARY KEY,
+[id_magazynu] INTEGER,
+[id_towaru] INTEGER,
+[ilosc] INTEGER,
+FOREIGN KEY (id_magazynu) REFERENCES Magazyny (id_magazynu),
+FOREIGN KEY (id_towaru) REFERENCES Towar (id_towaru)
+);
+
+CREATE TABLE [Zamowienia] (
+[id_zamowienia] INTEGER PRIMARY KEY,
+[id_klienta] INTEGER NOT NULL,
+[id_towaru] INTEGER NOT NULL,
+[id_magazynu] INTEGER NOT NULL,
+CHECK (length(id_klienta) > 0 AND length(id_towaru) > 0 AND length(id_magazynu) > 0 AND length(id_pracownika) > 0),
+FOREIGN KEY (id_klienta) REFERENCES Klienci (id_klienta),
+FOREIGN KEY (id_towaru) REFERENCES Towar (id_towaru),
+FOREIGN KEY (id_magazynu) REFERENCES Magazyny (id_magazynu),
+);
+
+CREATE TRIGGER adresy_mailowe AFTER INSERT ON [Pracownicy]
+BEGIN
+UPDATE [Pracownicy] set [mail]=(lower([imie]) || '.' || lower([nazwisko]) || '-' || id_pracownika || '@magazyn.pl');
+END;
+
+
+CREATE TRIGGER saldo0
+AFTER INSERT 
+ON [Klienci]
+BEGIN 
+UPDATE Klienci
+SET saldo=0;
+END;
+
+
+CREATE TRIGGER saldo 
+AFTER INSERT 
+ON [Zamowienia]
+BEGIN
+UPDATE Klienci
+SET saldo=saldo+(SELECT Towar.cena FROM Zamowienia
+JOIN Towar ON Zamowienia.id_towaru=Towar.id_towaru
+JOIN Klienci ON Zamowienia.id_klienta=Klienci.id_klienta
+WHERE Zamowienia.id_zamowienia=(SELECT max(id_zamowienia) FROM Zamowienia))
+WHERE id_klienta=(SELECT id_klienta FROM Zamowienia WHERE id_zamowienia=(SELECT max(id_zamowienia) FROM Zamowienia));
+END;
+
+CREATE TRIGGER zamowiony_towar
+AFTER INSERT 
+ON [Zamowienia]
+BEGIN
+UPDATE Dostep
+SET ilosc=ilosc-1
+WHERE id_towaru=(SELECT id_towaru FROM Zamowienia WHERE id_zamowienia=(SELECT max(id_zamowienia) FROM Zamowienia));
+END;
+
+
+
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Drewno Michala','Warszawa');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Budowle i Kowle','Torun');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Januszex','Sosnowiec');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Kolwes','Krakow');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Waslo SA','Krakow');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Zambiosa','Wrocław');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Plazosk','Wladyslawowo');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Lopaskos','Zakopane');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Budowlanka itd','Kazimierzewo');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Traktak Tartak','Towimor');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Kolki i Fiolki','Warszawa');
+INSERT INTO Magazyny (nazwa,adres) VALUES ('Krausta','Poznań');
+
+
+
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Milosz','Jablonski','1');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Bartosz','Ziemkiewicz','1');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Tomasz','Lomasz','1');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Adrianna','Lopasko','1');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Andrzej','Andruszewski','2');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Adam','Wkladam','2');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Antoniusz','Marecki','2');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Genowefa','Gwefa','3');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Marek','Szparek','3');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Karol','Rarol','4');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Aleksander','Wielki','5');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Marek','Antoniusz','6');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Cezar','Salatka','6');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Karol','Rarol','7');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Robert','Rarol','8');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Wojciech','Wladkowski','8');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Marek','Raczek','8');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Karol','Raczek','9');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Karol','Wielkanowski','9');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Roman','Chlodkow','10');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Cezary','Cezary','10');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Pola','Karola','11');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Antonina','Jablonska','11');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Magdalena','Boczek','11');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Ferdynand','Kiepski','11');
+INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Mikolaj','Kopernik','12');
+
+
+
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Tomek','Atomek');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Cola','Zimna');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Marlboro','Zielone');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Tomasz','Ziobro');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Mikolaj','Zimowy');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Cezary','Pomidorek');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Jolanta','Jopek');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Izylda','Zimna');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Krzysztof','Podkarpacki');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Pawel','Podwawelski');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Andrzej','Kielbasa');
+INSERT INTO Klienci (imie,nazwisko) VALUES ('Tomasz','Podkarpacki');
+
+
+
+INSERT INTO Towar (nazwa,cena) VALUES ('Telefon','1000');
+INSERT INTO Towar (nazwa,cena) VALUES ('Drukarka','2200');
+INSERT INTO Towar (nazwa,cena) VALUES ('Papier Zdjęciowy','300');
+INSERT INTO Towar (nazwa,cena) VALUES ('Portret Polaka Robaka','900');
+INSERT INTO Towar (nazwa,cena) VALUES ('Oregano','420');
+INSERT INTO Towar (nazwa,cena) VALUES ('Belki Podtrzymujące','500');
+INSERT INTO Towar (nazwa,cena) VALUES ('Samochod','20000');
+INSERT INTO Towar (nazwa,cena) VALUES ('Kreda','220');
+INSERT INTO Towar (nazwa,cena) VALUES ('Drewno opalowe','1500');
+INSERT INTO Towar (nazwa,cena) VALUES ('Ekogroszek','4500');
+INSERT INTO Towar (nazwa,cena) VALUES ('Piec Hutniczy','1200');
+INSERT INTO Towar (nazwa,cena) VALUES ('Fortepian','1420');
+INSERT INTO Towar (nazwa,cena) VALUES ('Gitara','520');
+INSERT INTO Towar (nazwa,cena) VALUES ('Zegarek','720');
+INSERT INTO Towar (nazwa,cena) VALUES ('Wywrotka','800');
+INSERT INTO Towar (nazwa,cena) VALUES ('Watrobka','1200');
+INSERT INTO Towar (nazwa,cena) VALUES ('Szafa Rakowa','760');
+INSERT INTO Towar (nazwa,cena) VALUES ('Kąkuter','999');
+INSERT INTO Towar (nazwa,cena) VALUES ('Windows 10','270');
+INSERT INTO Towar (nazwa,cena) VALUES ('Eset Encryption','150');
+INSERT INTO Towar (nazwa,cena) VALUES ('Koc Gaśniczy','100');
+INSERT INTO Towar (nazwa,cena) VALUES ('Bazylia','420');
+INSERT INTO Towar (nazwa,cena) VALUES ('Laptop','4220');
+
+
+
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('1','1','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('2','1','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('3','12','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('4','2','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('5','3','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('6','4','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('7','5','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('8','6','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('9','7','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('10','8','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('11','9','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('12','10','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('13','11','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('14','12','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('15','11','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('16','10','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('17','5','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('18','4','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('12','2','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('11','3','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('10','3','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('3','7','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('4','8','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('5','9','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('9','7','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('5','5','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('8','4','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('6','2','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('7','1','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('9','1','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('9','4','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('11','1','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('13','5','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('15','7','10');
+INSERT INTO Dostep (id_towaru,id_magazynu,ilosc) VALUES ('17','8','10');
+
+
+
+INSERT INTO Zamowienia (id_klienta,id_towaru,id_magazynu,id_pracownika) VALUES ('1','1','1','3');
+INSERT INTO Zamowienia (id_klienta,id_towaru,id_magazynu,id_pracownika) VALUES ('1','2','1','3');
+INSERT INTO Zamowienia (id_klienta,id_towaru,id_magazynu,id_pracownika) VALUES ('2','1','2','3');
+INSERT INTO Zamowienia (id_klienta,id_towaru,id_magazynu,id_pracownika) VALUES ('2','1','1','3');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

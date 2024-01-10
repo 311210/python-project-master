@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="alert alert-info" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="col w-50 p-3 position-absolute top-10 start-0">
+            <div class="bg-dark p-1">
+                <div class="container mt-1">
+                    <form class="d-flex" id="searchForm" method="POST" action="/search_magazyn">
+                        <input class="form-control d-inline m-2" type="search" name="search_name" placeholder="Name" aria-label="Name">
+                        <input class="form-control d-inline m-2" type="search" name="search_adress" placeholder="Adress" aria-label="Adress">
+                        <button class="btn btn-outline-light m-2" type="submit">Szukaj</button>
+                    </form>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addMagazynModal">Dodaj magazyn</button>
+            </div>
+            <div class="modal fade" id="addMagazynModal" tabindex="-1" aria-labelledby="addMagazynModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addMagazynModalLabel">Dodaj nowy magazyn</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/add_magazyn">
+                                <div class="mb-3">
+                                    <label for="newMagazynName" class="form-label">Nazwa magazynu</label>
+                                    <input type="text" class="form-control" id="newMagazynName" name="newMagazynName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newMagazynAdres" class="form-label">Adres magazynu</label>
+                                    <input type="text" class="form-control" id="newMagazynAdres" name="newMagazynAdres">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Dodaj</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+                <thead>
+                    <tr>
+                        <th scope="col">Nazwa</th>
+                        <th scope="col">Adres</th>
+                        <th scope="col">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for magazyn in magazyny %}
+                        <tr>
+                            <th scope="row">{{ magazyn.nazwa }}</th>
+                            <td>{{ magazyn.adres }}</td>
+                            <td>
+                                <div class="d-flex">
+                                    <form method="POST" action="/delete_magazyn/{{ magazyn.id_magazynu }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal{{ magazyn.id_magazynu }}">Edytuj</button>
+                                    </form>
+                                </div>
+                                <div class="modal fade" id="exampleModal{{ magazyn.id_magazynu }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ magazyn.id_magazynu }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel{{ magazyn.id_magazynu }}">Edytuj magazyn</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="POST" action="/edit_magazyn/{{ magazyn.id_magazynu }}">
+                                                    <div class="mb-3">
+                                                        <label for="new_name{{ magazyn.id_magazynu }}" class="col-form-label">Nazwa:</label>
+                                                        <input type="text" class="form-control" id="new_name{{ magazyn.id_magazynu }}" name="new_name" value="{{ magazyn.nazwa }}">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="new_adress{{ magazyn.id_magazynu }}" class="col-form-label">Adres:</label>
+                                                        <input type="text" class="form-control" id="new_adress{{ magazyn.id_magazynu }}" name="new_adress" value="{{ magazyn.adres }}">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col w-50 p-3 position-absolute top-10 start-50">
+            <div class="custom-table-responsive">
+                <table class="table table-striped table-bordered table-dark p-3 mt-3 bg-body rounded">
+                    <thead>
+                        <tr>
+                            <th scope="col">Statystyki</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Liczba magazynów:</td>
+                            <td>{{ liczba_magazynow }}</td>
+                        </tr>
+                        <tr>
+                            <td>Liczba miast:</td>
+                            <td>{{ liczba_miast }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
