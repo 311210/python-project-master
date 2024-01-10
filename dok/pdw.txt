@@ -108,7 +108,6 @@ INSERT INTO Magazyny (nazwa,adres) VALUES ('Krausta','Poznań');
 
 
 INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Milosz','Jablonski','1');
-INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Bartosz','Ziemkiewicz','1');
 INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Tomasz','Lomasz','1');
 INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Adrianna','Lopasko','1');
 INSERT INTO Pracownicy (imie,nazwisko,id_magazynu) VALUES ('Andrzej','Andruszewski','2');
